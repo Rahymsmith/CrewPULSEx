@@ -4,7 +4,8 @@ NASA Space Apps Challenge 2026 · Crew Health Challenge. React 18 + Vite, no oth
 
 ## Run
     npm install
-    npm run dev        # http://localhost:5173
+    npm run dev        #  http://localhost:5174/
+
     npm run build      # production build in dist/
 
 No install? Open `preview/index.html` directly in a browser.
