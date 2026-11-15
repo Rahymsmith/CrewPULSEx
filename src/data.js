@@ -23,6 +23,7 @@ export const NAV = [
   {
     group: 'CREW HEALTH',
     items: [
+      { to: '/app/crew-management', label: 'Crew management', icon: 'users' },
       { to: '/app/profile', label: 'Crew member profile', icon: 'user' },
       { to: '/app/vitals', label: 'Vital monitor', icon: 'heart' },
       { to: '/app/behavioral', label: 'Behavioural health', icon: 'brain' },

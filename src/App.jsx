@@ -10,6 +10,7 @@ import { Prediction, Breakdown, Evidence, AlertsCenter, Actions } from './pages/
 import { Simulator, CrewShield, EarthLink } from './pages/MissionSyncPages.jsx';
 import { MissionControl, Timeline, Reports, Settings } from './pages/OpsPages.jsx';
 import { NervousSystem, RocketJourney } from './pages/MissionVisuals.jsx';
+import CrewManagement from './pages/CrewManagement.jsx';
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
       <Route path="/app" element={<Shell />}>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="crew-management" element={<CrewManagement />} />
         <Route path="profile" element={<Profile />} />
         <Route path="vitals" element={<Vitals />} />
         <Route path="behavioral" element={<Behavioral />} />
