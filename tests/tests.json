@@ -1,0 +1,59 @@
+[
+  {
+    "name": "Enter demo workspace",
+    "covers": [
+      "landing",
+      "mission intro",
+      "role selection",
+      "demo access",
+      "synthetic data disclaimer"
+    ]
+  },
+  {
+    "name": "Navigate all 20 screens",
+    "covers": [
+      "crew dashboard",
+      "crew profile",
+      "vitals",
+      "behavioral health",
+      "sleep",
+      "AI prediction",
+      "risk breakdown",
+      "evidence",
+      "alerts",
+      "actions",
+      "simulator",
+      "CrewShield",
+      "EarthLink",
+      "mission control",
+      "timeline",
+      "reports",
+      "settings"
+    ]
+  },
+  {
+    "name": "Generate scenario narrative",
+    "covers": [
+      "API validation",
+      "scenario narrative",
+      "human review disclaimer"
+    ]
+  },
+  {
+    "name": "Model mission impact",
+    "covers": [
+      "sleep workload fatigue sliders",
+      "heuristic score",
+      "mitigation layers"
+    ]
+  },
+  {
+    "name": "Export mission report",
+    "covers": [
+      "crew snapshot",
+      "scenario",
+      "evidence metadata",
+      "synthetic-data disclaimer"
+    ]
+  }
+]
