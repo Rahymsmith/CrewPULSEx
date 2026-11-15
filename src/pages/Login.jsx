@@ -69,6 +69,7 @@ export default function Login() {
 
       localStorage.setItem('cpx_token', data.token);
       localStorage.setItem('cpx_user', JSON.stringify(data.user));
+      window.dispatchEvent(new Event('cpx-auth-changed'));
 
       const actualRole = ROLE_KEYS[data.user.role];
 

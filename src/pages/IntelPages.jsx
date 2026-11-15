@@ -22,59 +22,167 @@ export function drivers(c) {
 export const riskScore = (c) => clamp(Math.round(drivers(c).reduce((a, d) => a + d.v, 0) * 0.55 + 6));
 
 /* ------------------------------------------------------------- PREDICTION */
+
+
 export function Prediction() {
   const [crew, setCrew] = useCrew();
   const { setEvidenceId } = useStore();
   const nav = useNavigate();
   const [hz, setHz] = useState(72);
+
   const base = riskScore(crew);
   const steps = hz / 12;
   const labels = ['Now', ...Array.from({ length: steps }, (_, i) => `+${(i + 1) * 12}h`)];
   const trend = crew.status === 'Nominal' ? 0.4 : crew.status === 'Monitor' ? 2.2 : 4.4;
   const data = labels.map((_, i) => clamp(base + trend * i + (i % 2 ? 1.2 : -0.6)));
-  const band = { hi: data.map((v, i) => clamp(v + 3 + i * 1.4)), lo: data.map((v, i) => clamp(v - 3 - i * 1.4)) };
+  const band = {
+    hi: data.map((v, i) => clamp(v + 3 + i * 1.4)),
+    lo: data.map((v, i) => clamp(v - 3 - i * 1.4)),
+  };
 
   const cats = [
     { name: 'Sleep & fatigue', p: clamp(base + 10), ev: 'E-SLEEP', up: crew.sleep < crew.baseSleep - 0.8 },
     { name: 'Behavioral health', p: clamp(base - 6 + (75 - crew.mood) * 0.3), ev: 'E-BHP', up: crew.mood < 65 },
     { name: 'Team cohesion', p: clamp(base - 12), ev: 'E-TEAM', up: crew.status !== 'Nominal' },
     { name: 'Medical / physiological', p: clamp(base - 4 + (crew.baseHrv - crew.hrv) * 0.2), ev: 'E-MED', up: crew.hrv < crew.baseHrv - 10 },
-  ].map((c) => ({ ...c, p: Math.round(c.p) }));
-  const color = (p) => (p > 60 ? '#ef4444' : p > 40 ? '#f97316' : p > 25 ? '#f59e0b' : '#6ee3a3');
+  ].map(c => ({ ...c, p: Math.round(c.p) }));
+
+  const color = p => p > 60 ? '#ef4444' : p > 40 ? '#f97316' : p > 25 ? '#f59e0b' : '#6ee3a3';
+
+  const advice = {
+    'Sleep deficit vs. baseline': 'Review sleep opportunity, circadian scheduling and workload distribution.',
+    'HRV suppression': 'Review recovery context, measurement quality and relevant physiological trends with qualified personnel.',
+    'Workload above plan': 'Review task sequencing, workload distribution and available recovery periods.',
+    'Perceived stress': 'Consider a voluntary, confidential crew wellbeing check-in.',
+    'Low mood / cohesion': 'Review team communication, social support and opportunities for voluntary discussion.',
+  };
+
+  const insights = drivers(crew)
+    .sort((a, b) => b.v - a.v)
+    .slice(0, 3);
 
   return (
     <>
       <PageHead
         eyebrow="INTELLIGENCE"
-        title="AI risk prediction"
-        desc="Forecast of health and behavioral risk for the next 72 hours, with an uncertainty band. Illustrative model on simulated data."
-        right={<div className="seg">{[24, 48, 72].map((h) => <button key={h} className={hz === h ? 'on' : ''} onClick={() => setHz(h)}>{h}h</button>)}</div>}
+        title="Crew risk prediction"
+        desc="Illustrative 72-hour risk forecast and evidence-based crew insights using synthetic demonstration data."
+        right={
+          <div className="seg">
+            {[24, 48, 72].map(h => (
+              <button key={h} className={hz === h ? 'on' : ''} onClick={() => setHz(h)}>
+                {h}h
+              </button>
+            ))}
+          </div>
+        }
       />
+
       <CrewPicker value={crew.id} onChange={setCrew} />
+
       <div className="grid g-1-3">
         <Card title="Composite risk">
-          <div className="center"><Gauge value={base} label="now" size={190} color={color(base)} /></div>
+          <div className="center">
+            <Gauge value={base} label="now" size={190} color={color(base)} />
+          </div>
           <p className="center-t"><Pill status={crew.status} /></p>
-          <p className="muted small center-t">Projected {Math.round(data[data.length - 1])} at +{hz}h</p>
+          <p className="muted small center-t">
+            Projected {Math.round(data[data.length - 1])} at +{hz}h
+          </p>
         </Card>
-        <Card title={`Forecast — ${crew.name}`} sub="Risk index (0 = minimal, 100 = critical)">
-          <LineChart series={[{ name: 'Risk', color: '#f97316', data }]} band={band} labels={labels} height={250} unit="" />
+
+        <Card title={`Forecast — ${crew.name}`} sub="Illustrative risk index (0–100)">
+          <LineChart
+            series={[{ name: 'Risk', color: '#f97316', data }]}
+            band={band}
+            labels={labels}
+            height={250}
+            unit=""
+          />
         </Card>
       </div>
+
       <div className="grid g4">
-        {cats.map((c) => (
+        {cats.map(c => (
           <Tilt key={c.name} className="risk-tile" max={8}>
             <small>{c.name}</small>
             <b style={{ color: color(c.p) }}>{c.p}%</b>
-            <div className="bar thin"><i style={{ width: `${c.p}%`, background: color(c.p) }} /></div>
+            <div className="bar thin">
+              <i style={{ width: `${c.p}%`, background: color(c.p) }} />
+            </div>
             <span className="muted small">{c.up ? '▲ rising' : '▬ stable'}</span>
             <div className="row gap">
               <button className="chip" onClick={() => nav('/app/breakdown')}>Why?</button>
-              <button className="chip" onClick={() => { setEvidenceId(c.ev); nav('/app/evidence'); }}>Evidence</button>
+              <button className="chip" onClick={() => {
+                setEvidenceId(c.ev);
+                nav('/app/evidence');
+              }}>Evidence</button>
             </div>
           </Tilt>
         ))}
       </div>
+
+      <Card
+        title="Evidence-Based Crew Insights"
+        sub={`Automated scenario analysis for ${crew.name}`}
+      >
+        <div className="row gap" style={{ alignItems: 'center', marginBottom: 12 }}>
+          <Pill status={crew.status} />
+          <span className="muted small">Top contributing factors</span>
+        </div>
+
+        {insights.map((item, index) => {
+          const source = EVIDENCE.find(e => e.id === item.ev);
+          const details = advice[item.k];
+
+          return (
+            <div
+              key={item.k}
+              style={{
+                padding: '14px 0',
+                borderBottom: '1px solid var(--border, rgba(128,128,128,.2))'
+              }}
+            >
+              <div className="row" style={{ justifyContent: 'space-between', gap: 12 }}>
+                <strong>{index + 1}. {item.k}</strong>
+                <Pill status={item.v >= 40 ? 'Critical' : item.v >= 20 ? 'Monitor' : 'Nominal'} />
+              </div>
+
+              <p className="muted small">{item.note}</p>
+
+              <p>
+                {item.v === 0
+                  ? 'This factor is not currently contributing to the illustrative risk score.'
+                  : `${details || 'Review this factor in the context of the crew scenario.'}`}
+              </p>
+
+              {source && (
+                <div className="muted small">
+                  <strong>Evidence: {source.id}</strong>
+                  <p>{source.title}</p>
+                  <p>{source.org}</p>
+                  <button
+                    className="chip"
+                    onClick={() => {
+                      setEvidenceId(source.id);
+                      nav('/app/evidence');
+                    }}
+                  >
+                    View evidence
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        <p className="muted small" style={{ marginTop: 14 }}>
+          Method: transparent rule-based scoring using synthetic demonstration inputs.
+          These insights are not generated by a machine-learning model and are not
+          medical diagnoses, validated probabilities or operational flight decisions.
+          Qualified human review is required.
+        </p>
+      </Card>
     </>
   );
 }

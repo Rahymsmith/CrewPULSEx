@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Card, PageHead, Pill, Btn } from '../components/UI.jsx';
+import { useStore } from '../store.jsx';
 
 const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8787').replace(/\/$/, '');
 
 export default function CrewManagement() {
-  const [crew, setCrew] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { crewMembers: crew, crewLoading: loading, crewError: storeError, refreshCrew } = useStore();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -79,7 +79,7 @@ export default function CrewManagement() {
         status: 'Active'
       });
       setMessage('Crew member saved successfully.');
-      await loadCrew();
+    await refreshCrew();
     } catch (err) {
       setError(err.message || 'Unable to save crew member.');
     } finally {
@@ -184,7 +184,7 @@ export default function CrewManagement() {
 
         <Card title="Crew directory" sub={`${crew.length} saved record${crew.length === 1 ? '' : 's'} · Supabase database`}>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
-            <Btn variant="outline" onClick={loadCrew}>Refresh records</Btn>
+           <Btn variant="outline" onClick={refreshCrew}>Refresh records</Btn>
           </div>
 
           {loading ? (
